@@ -1,0 +1,365 @@
+pipeline:
+  fetch_interval_minutes: 60
+  dedupe_window_hours: 48
+  dedupe_similarity_threshold: 85
+  summarise_batch_size: 20
+  article_retention_days: 30
+  dashboard_article_age_hours: 24
+
+digest:
+  enabled: true
+  schedule:
+    - "08:00"
+    - "20:00"
+  top_n_per_topic: 5
+  recipient_email: "pawan2329@gmail.com"
+  sender_email: "\"Pawan's Personal News\" <newsdash@localhost>"
+
+topics:
+  - id: geopolitics_india
+    label: "Geopolitics — India Impact"
+    dashboard_column: geopolitics
+    derived: false
+    priority: 1
+    keywords: ["India", "Modi", "Delhi", "New Delhi", "South Asia", "SAARC", "Pakistan", "Bangladesh", "Sri Lanka", "Nepal", "Indo-Pacific", "Quad", "Indian foreign policy"]
+
+  - id: geopolitics
+    label: "Global Geopolitics"
+    dashboard_column: geopolitics
+    derived: false
+    priority: 2
+    keywords: ["war", "conflict", "sanctions", "treaty", "diplomacy", "NATO", "UN", "G20", "China", "Russia", "Ukraine", "Taiwan", "trade war", "tariffs", "alliance", "military", "nuclear", "geopolitics"]
+
+  - id: it_funding
+    label: "Funding, M&A and Investments"
+    dashboard_column: tech
+    derived: false
+    priority: 3
+    keywords: ["funding", "Series A", "Series B", "Series C", "seed round", "acquisition", "merger", "acqui-hire", "IPO", "valuation", "unicorn", "venture capital", "raises", "investment round"]
+
+  - id: ai_jobs
+    label: "AI and Job Market"
+    dashboard_column: ai
+    derived: false
+    priority: 5
+    keywords: ["AI jobs", "automation displacement", "future of work", "job loss", "AI unemployment", "workforce", "labor market", "reskilling", "job market"]
+
+  - id: ai_business
+    label: "AI Impact on Business"
+    dashboard_column: ai
+    derived: false
+    priority: 6
+    keywords: ["enterprise AI", "AI adoption", "AI ROI", "AI implementation", "automation", "AI strategy", "AI transformation", "corporate AI"]
+
+  - id: ai_news
+    label: "AI Space News"
+    dashboard_column: ai
+    derived: false
+    priority: 7
+    keywords: ["artificial intelligence", "machine learning", "deep learning", "LLM", "large language model", "GPT", "Claude", "Gemini", "Llama", "neural network", "transformer", "foundation model"]
+
+  - id: github_trending
+    label: "Trending on GitHub"
+    dashboard_column: tech
+    derived: false
+    priority: 8
+    keywords: []
+
+  - id: it_launches
+    label: "Big Launches and Updates"
+    dashboard_column: tech
+    derived: false
+    priority: 9
+    keywords: ["launch", "release", "update", "new version", "new feature", "announced", "changelog", "generally available", "open source", "Product Hunt"]
+
+  - id: it_news
+    label: "IT Industry News"
+    dashboard_column: tech
+    derived: false
+    priority: 10
+    keywords: ["software", "hardware", "cloud", "cybersecurity", "enterprise tech", "data center", "semiconductor", "chip", "IT infrastructure"]
+
+  - id: market_sectors_up
+    label: "Sectors to Watch — Tailwinds"
+    dashboard_column: markets
+    derived: true
+    priority: 99
+    keywords: []
+
+  - id: market_sectors_down
+    label: "Sectors Under Pressure"
+    dashboard_column: markets
+    derived: true
+    priority: 99
+    keywords: []
+
+  - id: ai_nonconventional
+    label: "Unconventional AI Implementations"
+    dashboard_column: ai
+    derived: true
+    priority: 4
+    keywords: []
+
+feeds:
+  - id: foreign_affairs
+    name: Foreign Affairs
+    url: https://www.foreignaffairs.com/rss.xml
+    topics: [geopolitics]
+    tier: 1
+    enabled: true
+
+  - id: foreign_policy
+    name: Foreign Policy
+    url: https://foreignpolicy.com/feed/
+    topics: [geopolitics]
+    tier: 2
+    enabled: true
+
+  - id: the_diplomat
+    name: The Diplomat
+    url: https://thediplomat.com/feed/
+    topics: [geopolitics]
+    tier: 2
+    enabled: true
+
+  - id: reuters_world
+    name: Reuters World
+    url: https://feeds.reuters.com/reuters/worldNews
+    topics: [geopolitics]
+    tier: 2
+    enabled: true
+
+  - id: economist_world
+    name: The Economist
+    url: https://www.economist.com/the-world-this-week/rss.xml
+    topics: [geopolitics]
+    tier: 1
+    enabled: true
+
+  - id: orfonline
+    name: Observer Research Foundation
+    url: https://www.orfonline.org/feed/
+    topics: [geopolitics_india]
+    tier: 1
+    enabled: true
+
+  - id: carnegie_india
+    name: Carnegie India
+    url: https://carnegieindia.org/rss/
+    topics: [geopolitics_india]
+    tier: 1
+    enabled: true
+
+  - id: takshashila
+    name: Takshashila Institution
+    url: https://takshashila.org.in/feed/
+    topics: [geopolitics_india]
+    tier: 1
+    enabled: true
+
+  - id: the_hindu_intl
+    name: The Hindu International
+    url: https://www.thehindu.com/news/international/feeder/default.rss
+    topics: [geopolitics_india]
+    tier: 2
+    enabled: true
+
+  - id: the_print_ns
+    name: The Print National Security
+    url: https://theprint.in/category/national-security/feed/
+    topics: [geopolitics_india]
+    tier: 2
+    enabled: true
+
+  - id: mit_tech_review_ai
+    name: MIT Technology Review AI
+    url: https://www.technologyreview.com/topic/artificial-intelligence/feed
+    topics: [ai_news]
+    tier: 1
+    enabled: true
+
+  - id: import_ai
+    name: Import AI
+    url: https://importai.substack.com/feed
+    topics: [ai_news]
+    tier: 1
+    enabled: true
+
+  - id: the_batch
+    name: The Batch DeepLearning.AI
+    url: https://www.deeplearning.ai/the-batch/feed.rss
+    topics: [ai_news]
+    tier: 1
+    enabled: true
+
+  - id: anthropic_blog
+    name: Anthropic Blog
+    url: https://www.anthropic.com/rss.xml
+    topics: [ai_news]
+    tier: 1
+    enabled: true
+
+  - id: openai_blog
+    name: OpenAI Blog
+    url: https://openai.com/blog/rss.xml
+    topics: [ai_news]
+    tier: 1
+    enabled: true
+
+  - id: deepmind_blog
+    name: Google DeepMind Blog
+    url: https://deepmind.google/blog/rss.xml
+    topics: [ai_news]
+    tier: 1
+    enabled: true
+
+  - id: venturebeat_ai
+    name: VentureBeat AI
+    url: https://venturebeat.com/category/ai/feed/
+    topics: [ai_news]
+    tier: 2
+    enabled: true
+
+  - id: hbr_ai
+    name: Harvard Business Review AI
+    url: https://hbr.org/topic/subject/ai/rss
+    topics: [ai_business]
+    tier: 1
+    enabled: true
+
+  - id: mckinsey_ai
+    name: McKinsey AI Insights
+    url: https://www.mckinsey.com/capabilities/quantumblack/our-insights/rss
+    topics: [ai_business]
+    tier: 1
+    enabled: true
+
+  - id: bcg_ai
+    name: BCG AI and Digital
+    url: https://www.bcg.com/rss/ideas.xml
+    topics: [ai_business]
+    tier: 1
+    enabled: true
+
+  - id: stanford_hai
+    name: Stanford HAI
+    url: https://hai.stanford.edu/news/rss.xml
+    topics: [ai_jobs]
+    tier: 1
+    enabled: true
+
+  - id: wef_future_work
+    name: World Economic Forum Future of Work
+    url: https://www.weforum.org/agenda/tag/future-of-work/rss
+    topics: [ai_jobs]
+    tier: 1
+    enabled: true
+
+  - id: brookings_ai
+    name: Brookings AI
+    url: https://www.brookings.edu/topic/artificial-intelligence/feed/
+    topics: [ai_jobs]
+    tier: 1
+    enabled: true
+
+  - id: ieee_spectrum_ai
+    name: IEEE Spectrum AI
+    url: https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss
+    topics: [ai_nonconventional]
+    tier: 1
+    enabled: true
+
+  - id: jmlr
+    name: Journal of Machine Learning Research
+    url: https://jmlr.org/jmlr.xml
+    topics: [ai_nonconventional]
+    tier: 1
+    enabled: true
+
+  - id: ars_technica
+    name: Ars Technica
+    url: https://feeds.arstechnica.com/arstechnica/index
+    topics: [it_news]
+    tier: 1
+    enabled: true
+
+  - id: the_register
+    name: The Register
+    url: https://www.theregister.com/headlines.atom
+    topics: [it_news]
+    tier: 1
+    enabled: true
+
+  - id: zdnet
+    name: ZDNet
+    url: https://www.zdnet.com/news/rss.xml
+    topics: [it_news]
+    tier: 2
+    enabled: true
+
+  - id: infoq
+    name: InfoQ
+    url: https://feed.infoq.com/
+    topics: [it_launches]
+    tier: 1
+    enabled: true
+
+  - id: the_new_stack
+    name: The New Stack
+    url: https://thenewstack.io/feed/
+    topics: [it_launches]
+    tier: 1
+    enabled: true
+
+  - id: hacker_news
+    name: Hacker News Top
+    url: https://hnrss.org/frontpage?points=200
+    topics: [it_launches]
+    tier: 2
+    enabled: true
+
+  - id: crunchbase_news
+    name: Crunchbase News
+    url: https://news.crunchbase.com/feed/
+    topics: [it_funding]
+    tier: 1
+    enabled: true
+
+  - id: techcrunch_venture
+    name: TechCrunch Venture
+    url: https://techcrunch.com/category/venture/feed/
+    topics: [it_funding]
+    tier: 2
+    enabled: true
+
+  - id: inc42
+    name: Inc42
+    url: https://inc42.com/feed/
+    topics: [it_funding]
+    tier: 2
+    enabled: true
+
+  - id: yourstory
+    name: YourStory
+    url: https://yourstory.com/feed
+    topics: [it_funding]
+    tier: 2
+    enabled: true
+
+  - id: entrackr
+    name: Entrackr
+    url: https://entrackr.com/feed/
+    topics: [it_funding]
+    tier: 2
+    enabled: true
+
+github:
+  enabled: true
+  languages:
+    - python
+    - javascript
+    - typescript
+    - rust
+    - go
+  time_range: weekly
+  min_stars_gained: 100

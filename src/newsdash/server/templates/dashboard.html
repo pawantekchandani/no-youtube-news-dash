@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="{{ refresh_seconds }}">
+  <title>Intelligence Dashboard — Personal Geopolitics & Tech</title>
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #121214;
+      --bg-surface: #1c1c1e;
+      --bg-surface-glass: rgba(28, 28, 30, 0.85);
+      --bg-card: #252528;
+      --border-color: rgba(255, 255, 255, 0.06);
+      --border-color-gaze: rgba(255, 255, 255, 0.12);
+      
+      /* Harmonious Palette (Apple News Vibe) */
+      --color-text-primary: #f5f5f7;
+      --color-text-secondary: #a1a1aa;
+      --color-text-muted: #71717a;
+      
+      --color-primary: #0a84ff; /* Apple blue */
+      --color-primary-glow: rgba(10, 132, 255, 0.2);
+      
+      --color-geopolitics: #ff453a; 
+      --color-ai: #30d158; 
+      --color-tech: #0a84ff; 
+      --color-markets: #ff9f0a; 
+      
+      --tier-1-bg: rgba(10, 132, 255, 0.15);
+      --tier-1-color: #5ac8fa;
+      --tier-2-bg: rgba(48, 209, 88, 0.15);
+      --tier-2-color: #30d158;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body { 
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-base);
+      color: var(--color-text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Premium Header */
+    header { 
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 32px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      background: var(--color-text-primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+      color: var(--bg-base);
+      font-size: 1.1rem;
+    }
+    
+    header h1 { 
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem; 
+      font-weight: 700; 
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .header-actions span { 
+      font-size: 0.8rem; 
+      color: var(--color-text-secondary);
+      background: var(--bg-surface);
+      padding: 8px 14px;
+      border-radius: 8px;
+    }
+    
+    .refresh-btn { 
+      background: var(--color-primary);
+      color: #fff; 
+      border: none; 
+      padding: 10px 20px; 
+      border-radius: 20px; 
+      font-size: 0.85rem; 
+      font-weight: 600;
+      cursor: pointer; 
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .refresh-btn:hover { 
+      background: #0071e3;
+      transform: scale(1.02);
+    }
+
+    .refresh-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Dashboard Layout Grid - Magazine Style */
+    .grid { 
+      display: flex; 
+      flex-direction: column;
+      gap: 56px; 
+      padding: 32px 48px;
+      min-height: calc(100vh - 75px);
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+    
+    .column { 
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    /* Column Headings */
+    .col-header { 
+      padding: 0 4px 12px 4px; 
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem; 
+      font-weight: 800; 
+      letter-spacing: -0.02em; 
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .column:nth-child(1) .col-header { color: var(--color-geopolitics); }
+    .column:nth-child(2) .col-header { color: var(--color-ai); }
+    .column:nth-child(3) .col-header { color: var(--color-tech); }
+    .column:nth-child(4) .col-header { color: var(--color-markets); }
+
+    /* Topic Sections */
+    .topic-section { 
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    
+    /* Make headers and insights span all columns */
+    .topic-header, .insight-card, .empty-state {
+      grid-column: 1 / -1;
+    }
+    
+    .topic-header { 
+      padding: 10px 14px;
+      margin: 16px 0 12px 0;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem; 
+      font-weight: 800; 
+      text-transform: uppercase; 
+      letter-spacing: 0.12em; 
+      color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-left: 5px solid var(--color-primary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    
+    .column:nth-child(1) .topic-header { 
+      border-left-color: var(--color-geopolitics); 
+      background: linear-gradient(90deg, rgba(255, 69, 58, 0.35) 0%, rgba(255, 69, 58, 0.08) 100%);
+    }
+    .column:nth-child(2) .topic-header { 
+      border-left-color: var(--color-ai); 
+      background: linear-gradient(90deg, rgba(48, 209, 88, 0.35) 0%, rgba(48, 209, 88, 0.08) 100%);
+    }
+    .column:nth-child(3) .topic-header { 
+      border-left-color: var(--color-tech); 
+      background: linear-gradient(90deg, rgba(10, 132, 255, 0.35) 0%, rgba(10, 132, 255, 0.08) 100%);
+    }
+    .column:nth-child(4) .topic-header { 
+      border-left-color: var(--color-markets); 
+      background: linear-gradient(90deg, rgba(255, 159, 10, 0.35) 0%, rgba(255, 159, 10, 0.08) 100%);
+    }
+    
+    /* Elegant Magazine Cards */
+    .article-card { 
+      padding: 20px; 
+      background: var(--bg-surface);
+      border-radius: 16px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .article-card:hover { 
+      background: var(--bg-card);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    
+    .article-card.read-article {
+      opacity: 0.6;
+      background: rgba(28, 28, 30, 0.5);
+      box-shadow: none;
+    }
+    
+    .article-title {
+      margin-bottom: 12px;
+    }
+
+    .article-title a { 
+      color: var(--color-text-primary); 
+      text-decoration: none; 
+      font-size: 1.05rem; 
+      line-height: 1.35; 
+      font-weight: 600; 
+      letter-spacing: -0.01em;
+      transition: color 0.2s;
+    }
+    
+    .article-title a:hover { 
+      color: var(--color-primary);
+    }
+    
+    .article-meta { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+      margin-bottom: 12px;
+    }
+    
+    .source-badge { 
+      font-size: 0.65rem; 
+      padding: 4px 10px; 
+      border-radius: 12px; 
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    
+    .tier-1 { 
+      background: var(--tier-1-bg); 
+      color: var(--tier-1-color); 
+    }
+    
+    .tier-2 { 
+      background: var(--tier-2-bg); 
+      color: var(--tier-2-color);
+    }
+    
+    .article-time { 
+      font-size: 0.75rem; 
+      color: var(--color-text-muted); 
+      font-weight: 500;
+    }
+    
+    .article-summary { 
+      font-size: 0.9rem; 
+      color: var(--color-text-secondary); 
+      line-height: 1.5; 
+      font-weight: 400;
+    }
+    
+    /* Empty State & Insight Cards */
+    .empty-state { 
+      padding: 24px; 
+      font-size: 0.85rem; 
+      color: var(--color-text-muted); 
+      font-style: italic; 
+      text-align: center;
+      background: transparent;
+      border-radius: 12px;
+      border: 1px dashed var(--border-color);
+    }
+    
+    .insight-card { 
+      padding: 20px; 
+      background: var(--bg-surface);
+      border-radius: 16px;
+      border-left: 4px solid var(--color-primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .insight-card p { 
+      font-size: 0.95rem; 
+      color: var(--color-text-primary); 
+      line-height: 1.5; 
+      font-weight: 500;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .article-card {
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    
+    .article-card:nth-child(1) { animation-delay: 0.05s; }
+    .article-card:nth-child(2) { animation-delay: 0.1s; }
+    .article-card:nth-child(3) { animation-delay: 0.15s; }
+    .article-card:nth-child(4) { animation-delay: 0.2s; }
+    .article-card:nth-child(5) { animation-delay: 0.25s; }
+
+    /* Responsive Overrides */
+    @media (max-width: 1280px) { 
+      .topic-section { grid-template-columns: repeat(2, 1fr); } 
+      .grid { padding: 24px 32px; }
+    }
+    @media (max-width: 768px) { 
+      .topic-section { grid-template-columns: 1fr; } 
+      .grid { padding: 16px; gap: 32px; } 
+      header { padding: 16px; flex-direction: column; gap: 16px; text-align: center; }
+      .brand { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="brand-logo">N</div>
+    <div>
+      <h1>Intelligence Dashboard</h1>
+      <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 4px; font-weight: 500;">
+        Tracking <span style="color: var(--color-text-primary); font-weight: 700; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin: 0 2px;">{{ total_articles }}</span> active stories
+      </div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span>Updated {{ generated_at }}</span>
+    <button class="refresh-btn" onclick="fetch('/api/refresh',{method:'POST'}).then(()=>location.reload())">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+</header>
+
+<div class="grid">
+  {% for col_id, col in columns.items() %}
+  <div class="column">
+    <div class="col-header">{{ col.label }}</div>
+    {% for topic_id in col.topics %}
+    <div class="topic-section">
+      <div class="topic-header">{{ topic_labels.get(topic_id, topic_id) }}</div>
+      {% if topic_id in ('market_sectors_up', 'market_sectors_down') %}
+        {% set topic_insights = insights | selectattr('topic_id', 'equalto', topic_id) | list %}
+        {% if topic_insights %}
+          {% for insight in topic_insights[:1] %}
+          <div class="insight-card"><p>{{ insight.content }}</p></div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">Geopolitics AI synthesis runs at 6:00 AM daily</div>
+        {% endif %}
+      {% else %}
+        {% set topic_insights = insights | selectattr('topic_id', 'equalto', topic_id) | list %}
+        {% if topic_insights %}
+          {% for insight in topic_insights[:1] %}
+          <div class="insight-card" style="border-left-color: var(--color-primary);"><p>{{ insight.content }}</p></div>
+          {% endfor %}
+        {% endif %}
+        {% set topic_articles = grouped.get(topic_id, []) %}
+        {% if topic_articles %}
+          {% for article in topic_articles[:10] %}
+          {% set word_count = (article.summary | default('') | wordcount) + (article.title | default('') | wordcount) %}
+          {% set read_time = (word_count / 200) | round(0, 'ceil') | int %}
+          {% set read_time = 1 if read_time < 1 else read_time %}
+          <div class="article-card {% if article.read %}read-article{% endif %}" id="article-{{ article.id }}">
+            <div class="article-title">
+              <a href="{{ article.url }}" target="_blank" rel="noopener" onclick="markRead({{ article.id }})">{{ article.title }}</a>
+            </div>
+            <div class="article-meta">
+              <span class="source-badge tier-{{ article.source_tier }}">{{ article.source_name }}</span>
+              {% if article.published_at %}
+              <span class="article-time">{{ article.published_at.strftime('%d %b, %H:%M') }}</span>
+              {% endif %}
+              <span class="read-time" style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.7;">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                {{ read_time }}m
+              </span>
+            </div>
+            {% if article.summary %}
+            <div class="article-summary">{{ article.summary }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">No articles fetched — manual refresh pending</div>
+        {% endif %}
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  async function markRead(articleId) {
+    const el = document.getElementById('article-' + articleId);
+    if (el) {
+      el.classList.add('read-article');
+    }
+    try {
+      await fetch('/api/articles/' + articleId + '/read', { method: 'POST' });
+    } catch (err) {
+      console.error('Error marking article as read:', err);
+    }
+  }
+</script>
+</body>
+</html>
