@@ -69,7 +69,7 @@ async def generate_brief_markdown(session: AsyncSession) -> str:
     # Header block
     timestamp_str = ist_now.strftime('%d %b %Y, %H:%M IST')
     lines = [
-        f"# Pawan's Personal Intelligence Brief",
+        f"# No-YouTube News Dash: Daily Brief",
         f"**Generated:** {timestamp_str} | **Total Fresh Headlines:** {total_headlines}",
         "",
         "---",
