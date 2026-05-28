@@ -30,32 +30,36 @@ async def main():
     scheduler = AsyncIOScheduler()
     scheduler.add_job(run_pipeline, IntervalTrigger(minutes=interval_minutes), id="pipeline")
     
-    # Register daily email digest jobs based on sources.yaml configuration
+    # Set up database engine and session factory
     from apscheduler.triggers.cron import CronTrigger
     from newsdash.db.models import create_db_engine, get_session_factory
-    from newsdash.digest.mailer import send_digest
 
     engine = create_db_engine()
     session_factory = get_session_factory(engine)
 
-    async def trigger_email_digest():
-        async with session_factory() as session:
-            await send_digest(session)
+    # Register Google Drive brief upload jobs
+    from newsdash.digest.drive_uploader import run_drive_upload
 
-    digest_cfg = config.get("digest", {})
-    if digest_cfg.get("enabled", False):
-        digest_schedule = digest_cfg.get("schedule", ["08:00", "20:00"])
-        for i, time_str in enumerate(digest_schedule):
+    async def trigger_drive_upload():
+        async with session_factory() as session:
+            # Load custom folder name if present
+            folder = config.get("drive_brief", {}).get("folder_name", "Newsdash Daily Briefs")
+            await run_drive_upload(session, folder_name=folder)
+
+    drive_brief_cfg = config.get("drive_brief", {})
+    if drive_brief_cfg.get("enabled", False):
+        drive_schedule = drive_brief_cfg.get("schedule", ["07:00", "19:00"])
+        for i, time_str in enumerate(drive_schedule):
             try:
                 hour, minute = map(int, time_str.strip().split(":"))
                 scheduler.add_job(
-                    trigger_email_digest,
+                    trigger_drive_upload,
                     CronTrigger(hour=hour, minute=minute),
-                    id=f"digest_{i}"
+                    id=f"drive_brief_{i}"
                 )
-                logging.info(f"Daily email digest scheduled at {time_str} (Job: digest_{i})")
+                logging.info(f"Daily Google Drive brief upload scheduled at {time_str} (Job: drive_brief_{i})")
             except Exception as se:
-                logging.error(f"Failed to parse and schedule digest time '{time_str}': {se}")
+                logging.error(f"Failed to parse and schedule drive brief time '{time_str}': {se}")
 
     scheduler.start()
 

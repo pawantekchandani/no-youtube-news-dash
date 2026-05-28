@@ -6,14 +6,12 @@ pipeline:
   article_retention_days: 30
   dashboard_article_age_hours: 24
 
-digest:
+drive_brief:
   enabled: true
   schedule:
-    - "08:00"
-    - "20:00"
-  top_n_per_topic: 5
-  recipient_email: "pawan2329@gmail.com"
-  sender_email: "\"Pawan's Personal News\" <newsdash@localhost>"
+    - "07:00"
+    - "19:00"
+  folder_name: "Newsdash Daily Briefs"
 
 topics:
   - id: geopolitics_india

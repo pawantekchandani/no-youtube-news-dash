@@ -86,7 +86,11 @@ async def dashboard(request: Request):
 
     topic_labels = {t["id"]: t["label"] for t in topics}
 
-    total_articles = sum(len(items) for items in grouped.values())
+    total_articles = 0
+    for col_id, col in columns.items():
+        for topic_id in col["topics"]:
+            if topic_id not in ("market_sectors_up", "market_sectors_down"):
+                total_articles += len(grouped.get(topic_id, [])[:10])
 
     return templates.TemplateResponse(
         request=request,
@@ -96,7 +100,7 @@ async def dashboard(request: Request):
             "columns": columns,
             "topic_labels": topic_labels,
             "insights": insights,
-            "generated_at": datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC"),
+            "generated_at": datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime("%d %b %Y, %H:%M IST"),
             "refresh_seconds": 1800,
             "total_articles": total_articles,
         }

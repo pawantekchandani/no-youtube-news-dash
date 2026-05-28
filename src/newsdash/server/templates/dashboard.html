@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="refresh" content="{{ refresh_seconds }}">
-  <title>Intelligence Dashboard — Personal Geopolitics & Tech</title>
+  <title>Pawan's News brief — Personal Geopolitics & Tech</title>
   <!-- Modern Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -169,7 +169,8 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 24px;
-      align-items: start;
+      align-items: stretch;
+      margin-bottom: 48px;
     }
     
     /* Make headers and insights span all columns */
@@ -219,6 +220,9 @@
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
     
     .article-card:hover { 
@@ -289,6 +293,7 @@
       color: var(--color-text-secondary); 
       line-height: 1.5; 
       font-weight: 400;
+      margin-top: auto;
     }
     
     /* Empty State & Insight Cards */
@@ -334,6 +339,57 @@
     .article-card:nth-child(4) { animation-delay: 0.2s; }
     .article-card:nth-child(5) { animation-delay: 0.25s; }
 
+    /* Premium Tabs Styles */
+    .tabs-container {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 32px auto 8px auto;
+      width: fit-content;
+      max-width: 90%;
+      padding: 6px;
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-radius: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    
+    .tab-button {
+      white-space: nowrap;
+      padding: 10px 24px;
+      background: transparent;
+      border: none;
+      border-radius: 24px;
+      color: var(--color-text-secondary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .tab-button:hover {
+      color: var(--color-text-primary);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    
+    .tab-button.active {
+      color: #fff;
+      background: var(--color-primary);
+      box-shadow: 0 4px 15px var(--color-primary-glow);
+    }
+    
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+
     /* Responsive Overrides */
     @media (max-width: 1280px) { 
       .topic-section { grid-template-columns: repeat(2, 1fr); } 
@@ -352,13 +408,11 @@
   <div class="brand">
     <div class="brand-logo">N</div>
     <div>
-      <h1>Intelligence Dashboard</h1>
-      <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 4px; font-weight: 500;">
-        Tracking <span style="color: var(--color-text-primary); font-weight: 700; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin: 0 2px;">{{ total_articles }}</span> active stories
-      </div>
+      <h1>Pawan's News brief</h1>
     </div>
   </div>
   <div class="header-actions">
+    <span style="font-weight: 600;">Headlines count = <strong id="headlines-count" style="color: var(--color-text-primary); font-weight: 800;">{{ total_articles }}</strong></span>
     <span>Updated {{ generated_at }}</span>
     <button class="refresh-btn" onclick="fetch('/api/refresh',{method:'POST'}).then(()=>location.reload())">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -369,67 +423,146 @@
   </div>
 </header>
 
-<div class="grid">
-  {% for col_id, col in columns.items() %}
-  <div class="column">
-    <div class="col-header">{{ col.label }}</div>
-    {% for topic_id in col.topics %}
-    <div class="topic-section">
-      <div class="topic-header">{{ topic_labels.get(topic_id, topic_id) }}</div>
-      {% if topic_id in ('market_sectors_up', 'market_sectors_down') %}
-        {% set topic_insights = insights | selectattr('topic_id', 'equalto', topic_id) | list %}
-        {% if topic_insights %}
-          {% for insight in topic_insights[:1] %}
-          <div class="insight-card"><p>{{ insight.content }}</p></div>
-          {% endfor %}
-        {% else %}
-          <div class="empty-state">Geopolitics AI synthesis runs at 6:00 AM daily</div>
-        {% endif %}
-      {% else %}
-        {% set topic_insights = insights | selectattr('topic_id', 'equalto', topic_id) | list %}
-        {% if topic_insights %}
-          {% for insight in topic_insights[:1] %}
-          <div class="insight-card" style="border-left-color: var(--color-primary);"><p>{{ insight.content }}</p></div>
-          {% endfor %}
-        {% endif %}
-        {% set topic_articles = grouped.get(topic_id, []) %}
-        {% if topic_articles %}
-          {% for article in topic_articles[:10] %}
-          {% set word_count = (article.summary | default('') | wordcount) + (article.title | default('') | wordcount) %}
-          {% set read_time = (word_count / 200) | round(0, 'ceil') | int %}
-          {% set read_time = 1 if read_time < 1 else read_time %}
-          <div class="article-card {% if article.read %}read-article{% endif %}" id="article-{{ article.id }}">
-            <div class="article-title">
-              <a href="{{ article.url }}" target="_blank" rel="noopener" onclick="markRead({{ article.id }})">{{ article.title }}</a>
-            </div>
-            <div class="article-meta">
-              <span class="source-badge tier-{{ article.source_tier }}">{{ article.source_name }}</span>
-              {% if article.published_at %}
-              <span class="article-time">{{ article.published_at.strftime('%d %b, %H:%M') }}</span>
-              {% endif %}
-              <span class="read-time" style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.7;">
-                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                </svg>
-                {{ read_time }}m
-              </span>
-            </div>
-            {% if article.summary %}
-            <div class="article-summary">{{ article.summary }}</div>
-            {% endif %}
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="empty-state">No articles fetched — manual refresh pending</div>
-        {% endif %}
-      {% endif %}
-    </div>
-    {% endfor %}
-  </div>
-  {% endfor %}
+{% set tab_config = [
+  {
+    'id': 'primary',
+    'topics': [
+      {'id': 'geopolitics_india', 'color': 'var(--color-geopolitics)'},
+      {'id': 'ai_nonconventional', 'color': 'var(--color-ai)'},
+      {'id': 'ai_news', 'color': 'var(--color-ai)'},
+      {'id': 'ai_business', 'color': 'var(--color-ai)'},
+      {'id': 'ai_jobs', 'color': 'var(--color-ai)'},
+      {'id': 'it_funding', 'color': 'var(--color-tech)'},
+      {'id': 'it_launches', 'color': 'var(--color-tech)'},
+      {'id': 'it_news', 'color': 'var(--color-tech)'},
+      {'id': 'market_sectors_up', 'color': 'var(--color-markets)'},
+      {'id': 'market_sectors_down', 'color': 'var(--color-markets)'}
+    ]
+  },
+  {
+    'id': 'geopolitics',
+    'topics': [
+      {'id': 'geopolitics', 'color': 'var(--color-geopolitics)'}
+    ]
+  },
+  {
+    'id': 'github',
+    'topics': [
+      {'id': 'github_trending', 'color': 'var(--color-tech)'}
+    ]
+  }
+] %}
+
+<div class="tabs-container">
+  <button id="btn-primary" class="tab-button active" onclick="switchTab('primary')">Primary</button>
+  <button id="btn-geopolitics" class="tab-button" onclick="switchTab('geopolitics')">Global GeoPolitics</button>
+  <button id="btn-github" class="tab-button" onclick="switchTab('github')">Github</button>
 </div>
 
+{% for tab in tab_config %}
+<div id="tab-{{ tab.id }}" class="tab-content {% if tab.id == 'primary' %}active{% endif %}">
+  <div class="grid">
+    <div class="column">
+      {% set ns = namespace(counter=1) %}
+      {% for topic in tab.topics %}
+        {% set topic_id = topic.id %}
+        {% set topic_color = topic.color %}
+        
+        {# Only render topic section if articles exist or it is a derived markets section #}
+        {% set topic_articles = grouped.get(topic_id, []) %}
+        {% set topic_insights = insights | selectattr('topic_id', 'equalto', topic_id) | list %}
+        
+        {% if topic_articles or topic_insights or topic_id in ('market_sectors_up', 'market_sectors_down') %}
+        <div class="topic-section">
+          <div class="topic-header" style="border-left-color: {{ topic_color }}; background: linear-gradient(90deg, color-mix(in srgb, {{ topic_color }} 35%, transparent) 0%, color-mix(in srgb, {{ topic_color }} 8%, transparent) 100%);">
+            {{ topic_labels.get(topic_id, topic_id) }}
+          </div>
+          
+          {% if topic_id in ('market_sectors_up', 'market_sectors_down') %}
+            {% if topic_insights %}
+              {% for insight in topic_insights[:1] %}
+              <div class="insight-card"><p>{{ insight.content }}</p></div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-state">Geopolitics AI synthesis runs at 6:00 AM daily</div>
+            {% endif %}
+          {% else %}
+            {% if topic_insights %}
+              {% for insight in topic_insights[:1] %}
+              <div class="insight-card" style="border-left-color: var(--color-primary);"><p>{{ insight.content }}</p></div>
+              {% endfor %}
+            {% endif %}
+            
+            {% if topic_articles %}
+              {% for article in topic_articles[:10] %}
+              {% set word_count = (article.summary | default('') | wordcount) + (article.title | default('') | wordcount) %}
+              {% set read_time = (word_count / 200) | round(0, 'ceil') | int %}
+              {% set read_time = 1 if read_time < 1 else read_time %}
+              <div class="article-card {% if article.read %}read-article{% endif %}" id="article-{{ article.id }}">
+                <div class="article-title">
+                  <a href="{{ article.url }}" target="_blank" rel="noopener" onclick="markRead({{ article.id }})">{{ ns.counter }}- {{ article.title }}</a>
+                </div>
+                {% set ns.counter = ns.counter + 1 %}
+                <div class="article-meta">
+                  <span class="source-badge tier-{{ article.source_tier }}">{{ article.source_name }}</span>
+                  {% if article.published_at %}
+                  <span class="article-time">{{ article.published_at.strftime('%d %b, %H:%M') }}</span>
+                  {% endif %}
+                  <span class="read-time" style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.7;">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    {{ read_time }}m
+                  </span>
+                </div>
+                {% if article.summary %}
+                <div class="article-summary">{{ article.summary }}</div>
+                {% endif %}
+              </div>
+              {% endfor %}
+            {% endif %}
+          {% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+
 <script>
+  function switchTab(tabId) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(el => {
+      el.classList.remove('active');
+    });
+    // Deactivate all buttons
+    document.querySelectorAll('.tab-button').forEach(el => {
+      el.classList.remove('active');
+    });
+    // Show active tab content
+    const activeTab = document.getElementById('tab-' + tabId);
+    if (activeTab) {
+      activeTab.classList.add('active');
+      // Dynamically calculate visible headlines for the selected tab
+      const cards = activeTab.querySelectorAll('.article-card');
+      const countEl = document.getElementById('headlines-count');
+      if (countEl) {
+        countEl.innerText = cards.length;
+      }
+    }
+    // Activate clicked button
+    const activeBtn = document.getElementById('btn-' + tabId);
+    if (activeBtn) {
+      activeBtn.classList.add('active');
+    }
+  }
+
+  // Trigger tab count refresh on page load
+  document.addEventListener("DOMContentLoaded", () => {
+    switchTab('primary');
+  });
+
   async function markRead(articleId) {
     const el = document.getElementById('article-' + articleId);
     if (el) {

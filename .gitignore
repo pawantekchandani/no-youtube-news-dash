@@ -7,3 +7,10 @@ __pycache__/
 *.egg-info/
 dist/
 .venv/
+
+# Google Drive credentials
+config/google_credentials.json
+config/google_token.json
+
+# Generated briefs
+config/brief_*.md
