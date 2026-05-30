@@ -5,12 +5,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+error_file_handler = logging.FileHandler("logs/errors.log")
+error_file_handler.setLevel(logging.ERROR)
+
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     handlers=[
         logging.StreamHandler(),
         logging.FileHandler("logs/newsdash.log"),
+        error_file_handler,
     ]
 )
 
@@ -39,32 +43,68 @@ async def main():
 
     # Register Google Drive brief upload jobs
     from newsdash.digest.drive_uploader import run_drive_upload
+    import json
+    from datetime import datetime, timezone, timedelta
 
-    async def trigger_drive_upload():
+    STATE_FILE = "config/upload_state.json"
+
+    async def trigger_drive_upload_if_needed():
+        drive_brief_cfg = config.get("drive_brief", {})
+        if not drive_brief_cfg.get("enabled", False):
+            return
+
+        schedule = drive_brief_cfg.get("schedule", ["07:00", "19:00"])
+        ist_now = datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
+        current_time_str = ist_now.strftime('%H:%M')
+        date_str = ist_now.strftime('%Y-%m-%d')
+
+        target_shift = None
+        for time_str in sorted(schedule):
+            if current_time_str >= time_str:
+                target_shift = time_str
+
+        if not target_shift:
+            return
+
+        shift_key = f"{date_str}_{target_shift}"
+        
+        state = {}
+        try:
+            with open(STATE_FILE, "r") as f:
+                state = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass
+
+        if state.get("last_uploaded_shift") == shift_key:
+            return
+
+        logging.info(f"Triggering Google Drive upload for shift {shift_key}")
         async with session_factory() as session:
-            # Load custom folder name if present
-            folder = config.get("drive_brief", {}).get("folder_name", "Newsdash Daily Briefs")
-            await run_drive_upload(session, folder_name=folder)
+            folder = drive_brief_cfg.get("folder_name", "Newsdash Daily Briefs")
+            try:
+                await run_drive_upload(session, folder_name=folder)
+                state["last_uploaded_shift"] = shift_key
+                with open(STATE_FILE, "w") as f:
+                    json.dump(state, f)
+                logging.info(f"Successfully recorded upload state for shift {shift_key}")
+            except Exception as e:
+                logging.error(f"Drive upload failed, will retry in 15 mins: {e}")
 
     drive_brief_cfg = config.get("drive_brief", {})
     if drive_brief_cfg.get("enabled", False):
-        drive_schedule = drive_brief_cfg.get("schedule", ["07:00", "19:00"])
-        for i, time_str in enumerate(drive_schedule):
-            try:
-                hour, minute = map(int, time_str.strip().split(":"))
-                scheduler.add_job(
-                    trigger_drive_upload,
-                    CronTrigger(hour=hour, minute=minute),
-                    id=f"drive_brief_{i}"
-                )
-                logging.info(f"Daily Google Drive brief upload scheduled at {time_str} (Job: drive_brief_{i})")
-            except Exception as se:
-                logging.error(f"Failed to parse and schedule drive brief time '{time_str}': {se}")
+        scheduler.add_job(
+            trigger_drive_upload_if_needed,
+            IntervalTrigger(minutes=15),
+            id="drive_brief_check"
+        )
+        logging.info("Google Drive upload check scheduled every 15 minutes.")
 
     scheduler.start()
 
     # Run once immediately on startup
     asyncio.create_task(run_pipeline())
+    if drive_brief_cfg.get("enabled", False):
+        asyncio.create_task(trigger_drive_upload_if_needed())
 
     config_uvicorn = uvicorn.Config(
         "newsdash.server.app:app",
