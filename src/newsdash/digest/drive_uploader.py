@@ -161,7 +161,7 @@ def upload_brief(service, folder_id: str, filename: str, content: str) -> str:
         ).execute()
         return new_file.get('id')
 
-async def run_drive_upload(session: AsyncSession, folder_name: str = DEFAULT_FOLDER_NAME):
+async def run_drive_upload(session: AsyncSession, folder_name: str = DEFAULT_FOLDER_NAME, target_shift: str = None):
     """Generate the markdown news brief and upload it to Google Drive as a Google Doc."""
     try:
         # Get Drive service
@@ -173,13 +173,17 @@ async def run_drive_upload(session: AsyncSession, folder_name: str = DEFAULT_FOL
     # Generate Markdown brief
     brief_content = await generate_brief_markdown(session)
 
-    # Determine brief filename based on IST time (no file extension for Google Doc format)
+    # Determine brief filename based on target shift or IST time (no file extension for Google Doc format)
     ist_now = datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
     date_str = ist_now.strftime('%Y-%m-%d')
-    if ist_now.hour < 12:
-        filename = f"brief_{date_str}_morning"
+    
+    if target_shift:
+        hour = int(target_shift.split(":")[0])
+        shift_suffix = "morning" if hour < 12 else "evening"
     else:
-        filename = f"brief_{date_str}_evening"
+        shift_suffix = "morning" if ist_now.hour < 12 else "evening"
+        
+    filename = f"brief_{date_str}_{shift_suffix}"
 
     try:
         folder_id = get_or_create_folder(service, folder_name)

@@ -82,7 +82,7 @@ async def main():
         async with session_factory() as session:
             folder = drive_brief_cfg.get("folder_name", "Newsdash Daily Briefs")
             try:
-                await run_drive_upload(session, folder_name=folder)
+                await run_drive_upload(session, folder_name=folder, target_shift=target_shift)
                 state["last_uploaded_shift"] = shift_key
                 with open(STATE_FILE, "w") as f:
                     json.dump(state, f)
